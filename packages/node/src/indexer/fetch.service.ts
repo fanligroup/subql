@@ -7,7 +7,13 @@ import { SchedulerRegistry } from '@nestjs/schedule';
 import { ApiPromise } from '@polkadot/api';
 
 import { isCustomDs, SubstrateHandlerKind } from '@subql/common-substrate';
-import { NodeConfig, BaseFetchService, getModulos } from '@subql/node-core';
+import {
+  NodeConfig,
+  BaseFetchService,
+  getModulos,
+  Header,
+  StoreCacheService,
+} from '@subql/node-core';
 import { SubstrateDatasource, SubstrateBlock } from '@subql/types';
 import { SubqueryProject } from '../configure/SubqueryProject';
 import { calcInterval, substrateHeaderToHeader } from '../utils/substrate';
@@ -35,10 +41,11 @@ export class FetchService extends BaseFetchService<
     @Inject('IBlockDispatcher')
     blockDispatcher: ISubstrateBlockDispatcher,
     dictionaryService: SubstrateDictionaryService,
-    private unfinalizedBlocksService: UnfinalizedBlocksService,
+    unfinalizedBlocksService: UnfinalizedBlocksService,
     eventEmitter: EventEmitter2,
     schedulerRegistry: SchedulerRegistry,
     private runtimeService: RuntimeService,
+    storeCacheService: StoreCacheService,
   ) {
     super(
       nodeConfig,
@@ -48,6 +55,8 @@ export class FetchService extends BaseFetchService<
       dictionaryService,
       eventEmitter,
       schedulerRegistry,
+      unfinalizedBlocksService,
+      storeCacheService,
     );
   }
 
@@ -55,14 +64,10 @@ export class FetchService extends BaseFetchService<
     return this.apiService.unsafeApi;
   }
 
-  protected async getFinalizedHeight(): Promise<number> {
+  protected async getFinalizedHeader(): Promise<Header> {
     const finalizedHash = await this.api.rpc.chain.getFinalizedHead();
     const finalizedHeader = await this.api.rpc.chain.getHeader(finalizedHash);
-
-    const header = substrateHeaderToHeader(finalizedHeader);
-
-    this.unfinalizedBlocksService.registerFinalizedBlock(header);
-    return header.blockHeight;
+    return substrateHeaderToHeader(finalizedHeader);
   }
 
   protected async getBestHeight(): Promise<number> {
@@ -90,7 +95,11 @@ export class FetchService extends BaseFetchService<
     );
   }
 
-  protected async preLoopHook({ startHeight }): Promise<void> {
+  protected async preLoopHook({
+    startHeight,
+  }: {
+    startHeight: number;
+  }): Promise<void> {
     this.runtimeService.init(this.getLatestFinalizedHeight.bind(this));
 
     await this.runtimeService.syncDictionarySpecVersions(startHeight);

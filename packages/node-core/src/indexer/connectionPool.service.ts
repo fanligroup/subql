@@ -53,7 +53,7 @@ export class ConnectionPoolService<T extends IApiConnectionSpecific<any, any, an
 
   async addToConnections(api: T, endpoint: string): Promise<void> {
     this.allApi[endpoint] = api;
-    await this.poolStateManager.addToConnections(endpoint, endpoint === this.nodeConfig.primaryNetworkEndpoint);
+    await this.poolStateManager.addToConnections(endpoint, endpoint === this.nodeConfig.primaryNetworkEndpoint?.[0]);
     if (api !== null) {
       await this.updateNextConnectedApiIndex();
     }
@@ -249,5 +249,12 @@ export class ConnectionPoolService<T extends IApiConnectionSpecific<any, any, an
     this.resultCache = [];
     this.lastCacheFlushTime = Date.now();
     await this.handleConnectionStateChange();
+  }
+
+  async updateChainTypes(newChainTypes: unknown): Promise<void> {
+    for (const endpoint in this.allApi) {
+      await this.allApi[endpoint].updateChainTypes?.(newChainTypes);
+    }
+    logger.info(`Network chain types updated!`);
   }
 }

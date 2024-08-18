@@ -7,11 +7,18 @@ import { DynamicModule, INestApplication } from '@nestjs/common';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ScheduleModule } from '@nestjs/schedule';
 import { Test } from '@nestjs/testing';
-import { DbModule, NodeConfig, registerApp } from '@subql/node-core';
+import {
+  CoreModule,
+  DbModule,
+  NodeConfig,
+  registerApp,
+} from '@subql/node-core';
 import { ConfigureModule } from '../configure/configure.module';
-import { SubqueryProject } from '../configure/SubqueryProject';
+import {
+  createSubQueryProject,
+  SubqueryProject,
+} from '../configure/SubqueryProject';
 import { FetchModule } from '../indexer/fetch.module';
-import { MetaModule } from '../meta/meta.module';
 
 const mockInstance = async (
   cid: string,
@@ -33,7 +40,7 @@ const mockInstance = async (
   };
   return registerApp<SubqueryProject>(
     argv,
-    SubqueryProject.create.bind(SubqueryProject),
+    createSubQueryProject,
     jest.fn(),
     '',
   );
@@ -97,8 +104,8 @@ export async function prepareApp(
         timestampField,
       ),
       ScheduleModule.forRoot(),
+      CoreModule,
       FetchModule,
-      MetaModule,
     ],
     controllers: [],
   }).compile();

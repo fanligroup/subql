@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0
 
 import assert from 'assert';
+import {setInterval} from 'timers';
 import PgPubSub from '@graphile/pg-pubsub';
 import {Module, OnModuleDestroy, OnModuleInit} from '@nestjs/common';
 import {HttpAdapterHost} from '@nestjs/core';
@@ -16,10 +17,10 @@ import {
 import {ApolloServer, UserInputError} from 'apollo-server-express';
 import compression from 'compression';
 import {NextFunction, Request, Response} from 'express';
-import ExpressPinoLogger from 'express-pino-logger';
+import PinoLogger from 'express-pino-logger';
 import {execute, GraphQLSchema, subscribe} from 'graphql';
 import {set} from 'lodash';
-import {Pool} from 'pg';
+import {Pool, PoolClient} from 'pg';
 import {makePluginHook} from 'postgraphile';
 import {SubscriptionServer} from 'subscriptions-transport-ws';
 import {Config} from '../configure';
@@ -127,11 +128,26 @@ export class GraphqlModule implements OnModuleInit, OnModuleDestroy {
     }
   }
 
+  private setupKeepAlive(pgClient: PoolClient) {
+    setInterval(() => {
+      void (async () => {
+        try {
+          await pgClient.query('SELECT 1');
+        } catch (err) {
+          getLogger('db').error('Schema listener client keep-alive query failed: ', err);
+        }
+      })();
+    }, this.config.get('sl-keep-alive-interval'));
+  }
+
   private async createServer() {
     const app = this.httpAdapterHost.httpAdapter.getInstance();
     const httpServer = this.httpAdapterHost.httpAdapter.getHttpServer();
 
-    const dbSchema = await this.projectService.getProjectSchema(this.config.get('name'));
+    const schemaName = this.config.get<string>('name');
+    if (!schemaName) throw new Error('Unable to get schema name from config');
+
+    const dbSchema = await this.projectService.getProjectSchema(schemaName);
     let options: PostGraphileCoreOptions = {
       replaceAllPlugins: plugins,
       subscriptions: true,
@@ -161,6 +177,14 @@ export class GraphqlModule implements OnModuleInit, OnModuleDestroy {
       try {
         const pgClient = await this.pgPool.connect();
         await pgClient.query(`LISTEN "${hashName(dbSchema, 'schema_channel', '_metadata')}"`);
+
+        // Set up a keep-alive interval to prevent the connection from being killed
+        this.setupKeepAlive(pgClient);
+
+        pgClient.on('error', (err: Error) => {
+          getLogger('db').error('PostgreSQL schema listener client error: ', err);
+          process.exit(1);
+        });
 
         pgClient.on('notification', (msg) => {
           if (msg.payload === 'schema_updated') {
@@ -206,7 +230,7 @@ export class GraphqlModule implements OnModuleInit, OnModuleDestroy {
       SubscriptionServer.create({schema, execute, subscribe}, {server: httpServer, path: '/'});
     }
 
-    app.use(ExpressPinoLogger(PinoConfig));
+    app.use(PinoLogger(PinoConfig));
     app.use(limitBatchedQueries);
     app.use(compression());
 

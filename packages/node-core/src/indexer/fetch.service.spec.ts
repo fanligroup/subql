@@ -5,7 +5,16 @@ import {EventEmitter2} from '@nestjs/event-emitter';
 import {SchedulerRegistry} from '@nestjs/schedule';
 import {BaseDataSource, BaseHandler, BaseMapping, DictionaryQueryEntry, IProjectNetworkConfig} from '@subql/types-core';
 import {range} from 'lodash';
-import {BlockDispatcher, delay, IBlock, IBlockDispatcher, IProjectService, NodeConfig} from '../';
+import {
+  BaseUnfinalizedBlocksService,
+  BlockDispatcher,
+  delay,
+  Header,
+  IBlock,
+  IBlockDispatcher,
+  IProjectService,
+  NodeConfig,
+} from '../';
 import {BlockHeightMap} from '../utils/blockHeightMap';
 import {DictionaryService} from './dictionary/dictionary.service';
 import {BaseFetchService} from './fetch.service';
@@ -24,9 +33,6 @@ class TestFetchService extends BaseFetchService<BaseDataSource, IBlockDispatcher
   }
   getGenesisHash(): string {
     return genesisHash;
-  }
-  async getFinalizedHeight(): Promise<number> {
-    return Promise.resolve(this.finalizedHeight);
   }
   async getBestHeight(): Promise<number> {
     return Promise.resolve(this.bestHeight);
@@ -63,6 +69,10 @@ class TestFetchService extends BaseFetchService<BaseDataSource, IBlockDispatcher
 
   mockDsMap(blockHeightMap: BlockHeightMap<any>): void {
     this.projectService.getDataSourcesMap = jest.fn(() => blockHeightMap);
+  }
+
+  async getFinalizedHeader(): Promise<Header> {
+    return Promise.resolve({blockHeight: this.finalizedHeight, blockHash: '0xxx', parentHash: '0xxx'});
   }
 }
 
@@ -156,6 +166,7 @@ describe('Fetch Service', () => {
   let dictionaryService: DictionaryService<any, any>;
   let networkConfig: IProjectNetworkConfig;
   let dataSources: BaseDataSource[];
+  let unfinalizedBlocksService: BaseUnfinalizedBlocksService<any>;
 
   let spyOnEnqueueSequential: jest.SpyInstance<
     void | Promise<void>,
@@ -199,7 +210,13 @@ describe('Fetch Service', () => {
       blockDispatcher,
       dictionaryService,
       eventEmitter,
-      schedulerRegistry
+      schedulerRegistry,
+      unfinalizedBlocksService,
+      {
+        metadata: {
+          set: jest.fn(),
+        },
+      } as any
     );
 
     spyOnEnqueueSequential = jest.spyOn(fetchService as any, 'enqueueSequential') as any;
@@ -318,7 +335,7 @@ describe('Fetch Service', () => {
   });
 
   it('checks chain heads at an interval', async () => {
-    const finalizedSpy = jest.spyOn(fetchService, 'getFinalizedHeight');
+    const finalizedSpy = jest.spyOn(fetchService, 'getFinalizedHeader');
     const bestSpy = jest.spyOn(fetchService, 'getBestHeight');
 
     await fetchService.init(1);
@@ -332,7 +349,11 @@ describe('Fetch Service', () => {
     expect(finalizedSpy).toHaveBeenCalledTimes(2);
     expect(bestSpy).toHaveBeenCalledTimes(2);
 
-    await expect(fetchService.getFinalizedHeight()).resolves.toBe(fetchService.finalizedHeight);
+    await expect(fetchService.getFinalizedHeader()).resolves.toEqual({
+      blockHeight: fetchService.finalizedHeight,
+      blockHash: '0xxx',
+      parentHash: '0xxx',
+    });
   });
 
   it('enqueues blocks WITHOUT dictionary', async () => {

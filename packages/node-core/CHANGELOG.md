@@ -6,8 +6,74 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [14.1.2] - 2024-08-14
 ### Added
-- Enable ts strict model 
+- Update polkadot/api library
+
+## [14.1.1] - 2024-08-12
+### Fixed
+- revert yargs version as it was returning a promise
+- DS Processor types not being able to distinguish input and filter types (#2522)
+
+## [14.1.0] - 2024-08-05
+### Changed
+- Update dependencies (#2518)
+
+## [14.0.0] - 2024-08-01
+### Added
+- A more useful error message when failing to require modules from the VM (#2512)
+- Support for endpoint configs (#2511)
+
+### Fixed
+- Handle when block timestamp can be undefined (#2513)
+
+## [13.0.2] - 2024-07-31
+### Fixed
+- Fixed project upgrade missing reload network chainTypes when `onProjectChange` (#2505)
+
+## [13.0.1] - 2024-07-29
+### Fixed
+- Fixed get and set data not been deepCloned and data is not mutable
+- Improved get bigInt type from json type
+
+## [13.0.0] - 2024-07-25
+### Changed
+- Breaking change: Require indexing environment timezone set to UTC, avoid inconsistent result from cache and database (#2495)
+
+### Fixed
+- Fix handle bigint type in jsonb array, both get and set method will generate consistent result (#2495)
+- Update with `@subql/utils`, fixed json and json array hashcode issue, improve poi consistency (#2497)
+
+### Added
+- SubqueryProject base from extracting common code (#2496)
+
+## [12.0.0] - 2024-07-22
+### Changed
+- Provide a better error message when user increases project start height beyond indexed height (#2492)
+- Define new core modules to reduce duplicate code in nodes (#2491)
+
+### Fixed
+- "targetHeight" being updated out of sync with indexing, leading to it possibly being behind "lastProcessedHeight" (#2491)
+
+## [11.0.0] - 2024-07-11
+### Changed
+- Create interval for flushing the cache, this is to support chains that only produce blocks with new transactions (#2485)
+- Improved types for strict TS setting (#2484)
+
+### Fixed
+- Improve indexer could stall due to rpc finalized height could be smaller than previous result (#2487)
+
+## [10.10.2] - 2024-07-10
+### Fixed
+- Fix issue admin api can not get `dbSize` due to it not been set in \_metadata table
+
+## [10.10.1] - 2024-07-09
+### Added
+- Enable ts strict setting
+
+### Fixed
+- Incrementing the schemaMigration count on every start (#2476)
+
 ## [10.10.0] - 2024-07-01
 ### Changed
 - Bump version with `@subql/common`
@@ -745,7 +811,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Move blockchain agnostic code from `node` to `node-core` package. (#1222)
 
-[Unreleased]: https://github.com/subquery/subql/compare/node-core/10.10.0...HEAD
+[Unreleased]: https://github.com/subquery/subql/compare/node-core/14.1.2...HEAD
+[14.1.2]: https://github.com/subquery/subql/compare/node-core/14.1.1...node-core/14.1.2
+[14.1.1]: https://github.com/subquery/subql/compare/node-core/14.1.0...node-core/14.1.1
+[14.1.0]: https://github.com/subquery/subql/compare/node-core/14.0.0...node-core/14.1.0
+[14.0.0]: https://github.com/subquery/subql/compare/node-core/13.0.2...node-core/14.0.0
+[13.0.2]: https://github.com/subquery/subql/compare/node-core/13.0.1...node-core/13.0.2
+[13.0.1]: https://github.com/subquery/subql/compare/node-core/13.0.0...node-core/13.0.1
+[13.0.0]: https://github.com/subquery/subql/compare/node-core/12.0.0...node-core/13.0.0
+[12.0.0]: https://github.com/subquery/subql/compare/node-core/11.0.0...node-core/12.0.0
+[11.0.0]: https://github.com/subquery/subql/compare/node-core/10.10.2...node-core/11.0.0
+[10.10.2]: https://github.com/subquery/subql/compare/node-core/10.10.1...node-core/10.10.2
+[10.10.1]: https://github.com/subquery/subql/compare/node-core/10.10.0...node-core/10.10.1
 [10.10.0]: https://github.com/subquery/subql/compare/node-core/10.9.0...node-core/10.10.0
 [10.9.0]: https://github.com/subquery/subql/compare/node-core/10.6.0...node-core/10.9.0
 [10.6.0]: https://github.com/subquery/subql/compare/node-core/10.5.1...node-core/10.6.0

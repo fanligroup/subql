@@ -29,7 +29,7 @@ jest.mock('@polkadot/api', () => {
 });
 
 const testNetwork = {
-  endpoint: ['ws://kusama.api.onfinality.io/public-ws'],
+  endpoint: { 'ws://kusama.api.onfinality.io/public-ws': {} },
   types: {
     TestType: 'u32',
   },
@@ -55,32 +55,32 @@ const testNetwork = {
 const nodeConfig = new NodeConfig({
   subquery: 'asdf',
   subqueryName: 'asdf',
-  networkEndpoint: ['https://polkadot.api.onfinality.io/public'],
+  networkEndpoint: { 'https://polkadot.api.onfinality.io/public': {} },
   dictionaryTimeout: 10,
 });
 
 function testSubqueryProject(): SubqueryProject {
-  return new SubqueryProject(
-    'test',
-    './',
-    {
+  return {
+    id: 'test',
+    root: './',
+    network: {
       endpoint: testNetwork.endpoint,
       // genesisHash:
       //   '0xb0a8d493285c2df73290dfb7e61f870f17b41801197a149ca93654499ea3dafe',
       chainId:
         '0xb0a8d493285c2df73290dfb7e61f870f17b41801197a149ca93654499ea3dafe',
     },
-    [],
-    new GraphQLSchema({}),
-    [],
-    {
+    dataSources: [],
+    schema: new GraphQLSchema({}),
+    templates: [],
+    chainTypes: {
       types: testNetwork.types,
       typesAlias: testNetwork.typesAlias,
       typesBundle: testNetwork.typesBundle,
       typesChain: testNetwork.typesChain,
       typesSpec: testNetwork.typesSpec,
     },
-  );
+  } as unknown as SubqueryProject;
 }
 
 describe('ApiService', () => {
@@ -109,9 +109,13 @@ describe('ApiService', () => {
     );
     await apiService.init();
     const { version } = require('../../package.json');
-    expect(WsProvider).toHaveBeenCalledWith(testNetwork.endpoint[0], 2500, {
-      'User-Agent': `SubQuery-Node ${version}`,
-    });
+    expect(WsProvider).toHaveBeenCalledWith(
+      Object.keys(testNetwork.endpoint)[0],
+      2500,
+      {
+        'User-Agent': `SubQuery-Node ${version}`,
+      },
+    );
     expect(createSpy).toHaveBeenCalledWith({
       provider: expect.anything(),
       throwOnConnect: expect.anything(),

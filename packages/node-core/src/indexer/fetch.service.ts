@@ -16,7 +16,9 @@ import {IBlockDispatcher} from './blockDispatcher';
 import {mergeNumAndBlocksToNums} from './dictionary';
 import {DictionaryService} from './dictionary/dictionary.service';
 import {getBlockHeight, mergeNumAndBlocks} from './dictionary/utils';
-import {IBlock, IProjectService} from './types';
+import {StoreCacheService} from './storeCache';
+import {Header, IBlock, IProjectService} from './types';
+import {IUnfinalizedBlocksServiceUtil} from './unfinalizedBlocks.service';
 
 const logger = getLogger('FetchService');
 
@@ -29,7 +31,7 @@ export abstract class BaseFetchService<DS extends BaseDataSource, B extends IBlo
   private bypassBlocks: number[] = [];
 
   // If the chain doesn't have a distinction between the 2 it should return the same value for finalized and best
-  protected abstract getFinalizedHeight(): Promise<number>;
+  protected abstract getFinalizedHeader(): Promise<Header>;
   protected abstract getBestHeight(): Promise<number>;
 
   // The rough interval at which new blocks are produced
@@ -50,7 +52,9 @@ export abstract class BaseFetchService<DS extends BaseDataSource, B extends IBlo
     protected blockDispatcher: B,
     protected dictionaryService: DictionaryService<DS, FB>,
     private eventEmitter: EventEmitter2,
-    private schedulerRegistry: SchedulerRegistry
+    private schedulerRegistry: SchedulerRegistry,
+    private unfinalizedBlocksService: IUnfinalizedBlocksServiceUtil,
+    private storeCacheService: StoreCacheService
   ) {}
 
   private get latestBestHeight(): number {
@@ -144,9 +148,15 @@ export abstract class BaseFetchService<DS extends BaseDataSource, B extends IBlo
 
   async getFinalizedBlockHead(): Promise<void> {
     try {
-      const currentFinalizedHeight = await this.getFinalizedHeight();
-      if (this._latestFinalizedHeight !== currentFinalizedHeight) {
-        this._latestFinalizedHeight = currentFinalizedHeight;
+      const currentFinalizedHeader = await this.getFinalizedHeader();
+      // Rpc could return finalized height below last finalized height due to unmatched nodes, and this could lead indexing stall
+      // See how this could happen in https://gist.github.com/jiqiang90/ea640b07d298bca7cbeed4aee50776de
+      if (
+        this._latestFinalizedHeight === undefined ||
+        currentFinalizedHeader.blockHeight > this._latestFinalizedHeight
+      ) {
+        this._latestFinalizedHeight = currentFinalizedHeader.blockHeight;
+        this.unfinalizedBlocksService.registerFinalizedBlock(currentFinalizedHeader);
         if (!this.nodeConfig.unfinalizedBlocks) {
           this.eventEmitter.emit(IndexerEvent.BlockTarget, {
             height: this.latestFinalizedHeight,
@@ -223,6 +233,9 @@ export abstract class BaseFetchService<DS extends BaseDataSource, B extends IBlo
         await delay(1);
         continue;
       }
+
+      // Update the target height, this happens here to stay in sync with the rest of indexing
+      this.storeCacheService.metadata.set('targetHeight', latestHeight);
 
       // This could be latestBestHeight, dictionary should never include finalized blocks
       // TODO add buffer so dictionary not used when project synced

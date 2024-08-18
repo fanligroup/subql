@@ -6,6 +6,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.1.1] - 2024-08-14
+### Added
+- Update polkadot/api library
+
+## [5.1.0] - 2024-08-05
+### Removed
+- `findAvailablePort` function, it now lives in `@subql/utils` (#2518)
+
+### Changed
+- Update dependencies (#2518)
+
+## [5.0.0] - 2024-08-01
+### Added
+- New type for endpoint to allow specifying endpoint options (#2511)
+
+## [4.1.1] - 2024-07-25
+### Changed
+- Bump version with `@subql/utils`
+
+## [4.1.0] - 2024-07-11
+### Added
+- Add `IPFSHTTPClientLite` to replace original `IPFSHTTPClient` in order to reduce dependencies (#2480)
+
+## [4.0.1] - 2024-07-09
+### Changed
+- Changes to ts build settings (#2475)
+
 ## [4.0.0] - 2024-07-01
 ### Changed
 - Breaking Change: Bump version with `@subql/types-core`, apply parseFunction type missing asImpl and its deployment (#2466)
@@ -380,8 +407,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - init commit
 
-[Unreleased]: https://github.com/subquery/subql/compare/common/4.0.0...HEAD
-[3.11.0]: https://github.com/subquery/subql/compare/common/3.9.0...common/4.0.0
+[Unreleased]: https://github.com/subquery/subql/compare/common/5.1.1...HEAD
+[5.1.1]: https://github.com/subquery/subql/compare/common/5.1.0...common/5.1.1
+[5.1.0]: https://github.com/subquery/subql/compare/common/5.0.0...common/5.1.0
+[5.0.0]: https://github.com/subquery/subql/compare/common/4.1.1...common/5.0.0
+[4.1.1]: https://github.com/subquery/subql/compare/common/4.1.0...common/4.1.1
+[4.1.0]: https://github.com/subquery/subql/compare/common/4.0.1...common/4.1.0
+[4.0.1]: https://github.com/subquery/subql/compare/common/4.0.0...common/4.0.1
+[4.0.0]: https://github.com/subquery/subql/compare/common/3.9.0...common/4.0.0
 [3.9.0]: https://github.com/subquery/subql/compare/common/3.8.0...common/3.9.0
 [3.8.0]: https://github.com/subquery/subql/compare/common/3.7.0...common/3.8.0
 [3.7.0]: https://github.com/subquery/subql/compare/common/3.6.0...common/3.7.0

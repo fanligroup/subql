@@ -16,18 +16,18 @@ function testSubqueryProject(
   endpoint: string[],
   chainId: string,
 ): SubqueryProject {
-  return new SubqueryProject(
-    'test',
-    './',
-    {
+  return {
+    id: 'test',
+    root: './',
+    network: {
       endpoint,
       dictionary: ['http://mock-dictionary-v2'],
       chainId: chainId,
     },
-    [],
-    new GraphQLSchema({}),
-    [],
-  );
+    dataSources: [],
+    schema: new GraphQLSchema({}),
+    templates: [],
+  } as unknown as SubqueryProject;
 }
 
 // Mock jest and set the type
@@ -41,7 +41,7 @@ describe('Substrate Dictionary service', function () {
     const nodeConfig = new NodeConfig({
       subquery: 'dictionaryService',
       subqueryName: 'asdf',
-      networkEndpoint: ['wss://polkadot.api.onfinality.io/public-ws'],
+      networkEndpoint: { 'wss://polkadot.api.onfinality.io/public-ws': {} },
       dictionaryTimeout: 10,
       networkDictionary: ['http://mock-dictionary-v2'],
       dictionaryRegistry: 'false',
@@ -73,7 +73,7 @@ describe('Substrate Dictionary service', function () {
     expect(spyDictionaryV1Create).toHaveBeenCalledTimes(1);
     expect(
       (dictionaryService as any)._dictionaries.every(
-        (d) => d instanceof SubstrateDictionaryV1,
+        (d: any) => d instanceof SubstrateDictionaryV1,
       ),
     ).toBeTruthy();
   });

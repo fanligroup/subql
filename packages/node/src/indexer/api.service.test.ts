@@ -12,6 +12,7 @@ import {
   NodeConfig,
 } from '@subql/node-core';
 import { SubstrateBlock } from '@subql/types';
+import { IEndpointConfig } from '@subql/types-core';
 import { GraphQLSchema } from 'graphql';
 import { SubqueryProject } from '../configure/SubqueryProject';
 import { wrapBlock } from '../utils/substrate';
@@ -24,26 +25,26 @@ const TEST_BLOCKHASH =
   '0x70070f6c1ad5b9ce3d0a09e94086e22b8d4f08a18491183de96614706bf59600'; // kusama #6721189
 
 function testSubqueryProject(
-  endpoint: string[],
+  endpoint: Record<string, IEndpointConfig>,
   chainId: string,
 ): SubqueryProject {
-  return new SubqueryProject(
-    'test',
-    './',
-    {
+  return {
+    id: 'test',
+    root: './',
+    network: {
       endpoint,
       dictionary: `https://api.subquery.network/sq/subquery/dictionary-polkadot`,
       chainId: chainId,
     },
-    [],
-    new GraphQLSchema({}),
-    [],
-    {
+    dataSources: [],
+    schema: new GraphQLSchema({}),
+    templates: [],
+    chainTypes: {
       types: {
         TestType: 'u32',
       },
     },
-  );
+  } as unknown as SubqueryProject;
 }
 
 jest.setTimeout(90000);
@@ -64,7 +65,7 @@ describe('ApiService', () => {
         ConnectionPoolService,
         {
           provide: 'ISubqueryProject',
-          useFactory: () => testSubqueryProject([endpoint], chainId),
+          useFactory: () => testSubqueryProject({ [endpoint]: {} }, chainId),
         },
         {
           provide: NodeConfig,
@@ -443,7 +444,7 @@ describe('Load chain type hasher', () => {
   });
 
   const prepareApiService = async (
-    endpoint = ['wss://hyperbridge-paseo-rpc.blockops.network'],
+    endpoint = { 'wss://hyperbridge-paseo-rpc.blockops.network': {} },
     chainId = '0x5388faf792c5232566d21493929b32c1f20a9c2b03e95615eefec2aa26d64b73',
   ): Promise<ApiService> => {
     const module = await Test.createTestingModule({
@@ -452,29 +453,28 @@ describe('Load chain type hasher', () => {
         ConnectionPoolService,
         {
           provide: 'ISubqueryProject',
-          useFactory: () =>
-            new SubqueryProject(
-              'test',
-              './',
-              {
-                endpoint,
-                chainId: chainId,
-              },
-              [],
-              new GraphQLSchema({}),
-              [],
-              {
-                typesBundle: {
-                  spec: {
-                    gargantua: {
-                      // @ts-ignore, we allow it to be string here
-                      hasher: 'keccakAsU8a',
-                      types: [{ minmax: [0, undefined], types: {} }],
-                    },
+          useFactory: () => ({
+            id: 'test',
+            root: './',
+            network: {
+              endpoint,
+              chainId: chainId,
+            },
+            dataSources: [],
+            schema: new GraphQLSchema({}),
+            templates: [],
+            chainTypes: {
+              typesBundle: {
+                spec: {
+                  gargantua: {
+                    // @ts-ignore, we allow it to be string here
+                    hasher: 'keccakAsU8a',
+                    types: [{ minmax: [0, undefined], types: {} }],
                   },
                 },
               },
-            ),
+            },
+          }),
         },
         {
           provide: NodeConfig,

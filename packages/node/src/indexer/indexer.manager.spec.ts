@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0
 
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { SchedulerRegistry } from '@nestjs/schedule';
 import {
   SubstrateDatasourceKind,
   SubstrateHandlerKind,
@@ -58,18 +59,18 @@ jest.setTimeout(200000);
 const nodeConfig = new NodeConfig({
   subquery: 'asdf',
   subqueryName: 'asdf',
-  networkEndpoint: ['wss://polkadot.api.onfinality.io/public-ws'],
+  networkEndpoint: { 'wss://polkadot.api.onfinality.io/public-ws': {} },
 });
 
 function testSubqueryProject_1(): SubqueryProject {
-  return new SubqueryProject(
-    'test',
-    './',
-    {
+  return {
+    id: 'test',
+    root: './',
+    network: {
       chainId: '0x',
       endpoint: ['wss://polkadot.api.onfinality.io/public-ws'],
     },
-    [
+    dataSources: [
       {
         kind: SubstrateDatasourceKind.Runtime,
         startBlock: 1,
@@ -91,22 +92,22 @@ function testSubqueryProject_1(): SubqueryProject {
         },
       },
     ],
-    new GraphQLSchema({}),
-    [],
-  );
+    schema: new GraphQLSchema({}),
+    templates: [],
+  } as unknown as SubqueryProject;
 }
 
 function testSubqueryProject_2(): SubqueryProject {
-  return new SubqueryProject(
-    'test',
-    './',
-    {
+  return {
+    id: 'test',
+    root: './',
+    network: {
       endpoint: ['wss://polkadot.api.onfinality.io/public-ws'],
       dictionary: `https://api.subquery.network/sq/subquery/dictionary-polkadot`,
       chainId:
         '0x91b171bb158e2d3848fa23a9f1c25182fb8e20313b2c1eb49219da7a70ce90c3',
     },
-    [
+    dataSources: [
       {
         kind: SubstrateDatasourceKind.Runtime,
         startBlock: 1,
@@ -118,9 +119,9 @@ function testSubqueryProject_2(): SubqueryProject {
         },
       },
     ],
-    new GraphQLSchema({}),
-    [],
-  );
+    schema: new GraphQLSchema({}),
+    templates: [],
+  } as unknown as SubqueryProject;
 }
 
 // eslint-disable-next-line jest/no-export
@@ -165,7 +166,12 @@ function createIndexerManager(
   const dsProcessorService = new DsProcessorService(project, nodeConfig);
   const dynamicDsService = new DynamicDsService(dsProcessorService, project);
 
-  const storeCache = new StoreCacheService(sequelize, nodeConfig, eventEmitter);
+  const storeCache = new StoreCacheService(
+    sequelize,
+    nodeConfig,
+    eventEmitter,
+    new SchedulerRegistry(),
+  );
   const storeService = new StoreService(
     sequelize,
     nodeConfig,

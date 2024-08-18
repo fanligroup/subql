@@ -5,6 +5,63 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## [5.2.2] - 2024-08-14
+### Added
+- Update polkadot/api library
+
+## [5.2.1] - 2024-08-12
+### Fixed
+- Subcommands not working because of yargs dependency
+
+## [5.2.0] - 2024-08-05
+### Changed
+- Update dependencies (#2518)
+
+## [5.1.0] - 2024-08-01
+### Added
+- Support endpoint configs and specifying headers for network endpoints (#2511)
+
+### Fixed
+- Fixed timestamp can be undefined in some network blocks, it should return undefined (#2513)
+
+## [5.0.2] - 2024-07-31
+### Fixed
+- Fixed api not reloading new deployment chainTypes when project upgrades (#2505)
+
+## [5.0.1] - 2024-07-29
+### Fixed
+- Fixed default Timezone to UTC in dockerfile and package.json (#2505)
+- Bump with `node-core`, fixed various data consistency issue with db and cache (#2504)
+
+## [5.0.0] - 2024-07-25
+### Changed
+- Breaking change: Update with `@subql/node-core`, require indexing environment timezone set to UTC (#2495)
+- Update SubqueryProject to use code from node-core (#2496)
+
+### Fixed
+- Bump with `@subql/node-core`, fixed various issues causing poi inconsistency (#2497)
+
+## [4.9.0] - 2024-07-22
+### Changed
+- Tidy up modules to match changes with node-core (#2491)
+
+## [4.8.2] - 2024-07-16
+### Fixed
+- Fix dockerfile missing set timezone to UTC (#2489)
+
+## [4.8.1] - 2024-07-11
+### Removed
+- Unused type (#2484)
+
+### Changed
+- Make change with `node-core` fetch service, change `getFinalizedHeight` to `getFinalizedHeader` (#2487)
+
+## [4.8.0] - 2024-07-10
+### Changed
+- Bump with `@subql/node-core`, fix admin api `dbSize` issue
+
+## [4.7.1] - 2024-07-09
 ### Added
 - Enable ts strict model
 
@@ -1242,7 +1299,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - bump @polkadot/api to 3.1.1
 
-[Unreleased]: https://github.com/subquery/subql/compare/node/4.7.0...HEAD
+[Unreleased]: https://github.com/subquery/subql/compare/node/5.2.2...HEAD
+[5.2.2]: https://github.com/subquery/subql/compare/node/5.2.1...node/5.2.2
+[5.2.1]: https://github.com/subquery/subql/compare/node/5.2.0...node/5.2.1
+[5.2.0]: https://github.com/subquery/subql/compare/node/5.1.0...node/5.2.0
+[5.1.0]: https://github.com/subquery/subql/compare/node/5.0.2...node/5.1.0
+[5.0.2]: https://github.com/subquery/subql/compare/node/5.0.1...node/5.0.2
+[5.0.1]: https://github.com/subquery/subql/compare/node/5.0.0...node/5.0.1
+[5.0.0]: https://github.com/subquery/subql/compare/node/4.9.0...node/5.0.0
+[4.9.0]: https://github.com/subquery/subql/compare/node/4.8.2...node/4.9.0
+[4.8.2]: https://github.com/subquery/subql/compare/node/4.8.1...node/4.8.2
+[4.8.1]: https://github.com/subquery/subql/compare/node/4.8.0...node/4.8.1
+[4.8.0]: https://github.com/subquery/subql/compare/node/4.7.1...node/4.8.0
+[4.7.1]: https://github.com/subquery/subql/compare/node/4.7.0...node/4.7.1
 [4.7.0]: https://github.com/subquery/subql/compare/node/4.6.6...node/4.7.0
 [4.6.6]: https://github.com/subquery/subql/compare/node/4.6.5...node/4.6.6
 [4.6.5]: https://github.com/subquery/subql/compare/node/4.6.4...node/4.6.5

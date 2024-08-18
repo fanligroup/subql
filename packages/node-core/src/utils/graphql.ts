@@ -12,8 +12,10 @@ import {
   isBuffer,
   isNull,
   GraphQLEntityField,
+  GraphQLJsonFieldType,
 } from '@subql/utils';
 import {ModelAttributes, ModelAttributeColumnOptions} from '@subql/x-sequelize';
+import {isArray, isObject} from 'lodash';
 import {enumNameToHash} from '../db';
 
 export interface EnumType {
@@ -57,9 +59,9 @@ export function getColumnOption(
 
   const type = field.isEnum
     ? `${enumType}${field.isArray ? '[]' : ''}`
-    : field.isArray
-    ? getTypeByScalarName('Json')?.sequelizeType
-    : getTypeByScalarName(field.type)?.sequelizeType;
+    : field.isArray || field.jsonInterface
+      ? getTypeByScalarName('Json')?.sequelizeType
+      : getTypeByScalarName(field.type)?.sequelizeType;
 
   if (type === undefined) {
     throw new Error('Unable to get model type');
@@ -112,5 +114,71 @@ export function getColumnOption(
       }
     };
   }
+  if (field.jsonInterface) {
+    columnOption.get = function () {
+      const dataValue = this.getDataValue(field.name);
+
+      if (!dataValue || !field.jsonInterface) {
+        return null;
+      }
+      return field.isArray ? dataValue.map((v: any) => processGetJson(field, v)) : processGetJson(field, dataValue);
+    };
+    columnOption.set = function (val: unknown) {
+      if (val === undefined || isNull(val)) {
+        this.setDataValue(field.name, null);
+        return;
+      }
+      if (isArray(val)) {
+        const setValue = val.length === 0 ? [] : val.map((v) => processSetJson(v));
+        this.setDataValue(field.name, setValue);
+      } else if (isObject(val)) {
+        this.setDataValue(field.name, processSetJson(val));
+      } else {
+        throw new Error(`input for Json type only supports object or array, received type ${typeof val}`);
+      }
+    };
+  }
   return columnOption;
+}
+
+/***
+ * Process nested json get, output is same as input value type
+ * @param field
+ * @param value
+ */
+function processGetJson(field: GraphQLEntityField | GraphQLJsonFieldType, value: any): any {
+  // bigIntFields and nestJsonFields from this level in the entity/json
+  const bigIntFields = field.jsonInterface?.fields.filter((f) => f.type === 'BigInt');
+  const nestJsonFields = field.jsonInterface?.fields.filter((f) => f.jsonInterface);
+  const processBigIntFields = (value: any) => {
+    if (bigIntFields) {
+      for (const bigIntField of bigIntFields) {
+        // If null is passed, we should not convert it to BigInt
+        if (value[bigIntField.name] !== undefined && value[bigIntField.name] !== null) {
+          value[bigIntField.name] = BigInt(value[bigIntField.name].slice(0, -1));
+        }
+      }
+    }
+    return value;
+  };
+  if (nestJsonFields) {
+    for (const nestJsonField of nestJsonFields) {
+      // have a nest field, and nest field is json type, also value is defined
+      if (nestJsonField.jsonInterface && value[nestJsonField.name]) {
+        value[nestJsonField.name] = processGetJson(nestJsonField, value[nestJsonField.name]);
+      }
+    }
+  }
+  return processBigIntFields(value);
+}
+
+function processSetJson(data: any): any {
+  return JSON.parse(
+    JSON.stringify(data, (key, value) => {
+      if (typeof value === 'bigint') {
+        return `${value}n`;
+      }
+      return value;
+    })
+  );
 }

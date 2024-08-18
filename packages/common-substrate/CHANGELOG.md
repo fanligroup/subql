@@ -6,9 +6,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+## [4.3.0] - 2024-08-05
+### Changed
+- Update dependencies (#2518)
+
+## [4.2.0] - 2024-08-01
+### Added
+- Updated `@subql\common` with support for endpoint specific configs (#2511)
+
+## [4.1.1] - 2024-07-25
+### Changed
+- Bump version with `@subql/common`
+- input type updated in `isRuntimeDs` (#2496)
+
+## [4.1.0] - 2024-07-11
+### Removed
+- Unused functions (#2484)
+
+### Changed
+- Bump with `subql/common`
+
+## [4.0.1] - 2024-07-09
+### Changed
+- Changes to ts build settings (#2475)
+
 ## [4.0.0] - 2024-07-01
 ### Added
-- Enable ts strict mode
+- Enable ts strict setting
 - Breaking Change: Add alias `parseProjectManifest`, also follow type of `INetworkCommonModule` (#2462)
 
 ## [3.8.1] - 2024-06-21
@@ -161,8 +186,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - init commit
 
-[Unreleased]: https://github.com/subquery/subql/compare/common-substrate/4.0.0...HEAD
-[3.9.0]: https://github.com/subquery/subql/compare/common-substrate/3.8.1...common-substrate/4.0.0
+[Unreleased]: https://github.com/subquery/subql/compare/common-substrate/4.3.0...HEAD
+[4.3.0]: https://github.com/subquery/subql/compare/common-substrate/4.2.0...common-substrate/4.3.0
+[4.2.0]: https://github.com/subquery/subql/compare/common-substrate/4.1.1...common-substrate/4.2.0
+[4.1.1]: https://github.com/subquery/subql/compare/common-substrate/4.1.0...common-substrate/4.1.1
+[4.1.0]: https://github.com/subquery/subql/compare/common-substrate/4.0.1...common-substrate/4.1.0
+[4.0.1]: https://github.com/subquery/subql/compare/common-substrate/4.0.0...common-substrate/4.0.1
+[4.0.0]: https://github.com/subquery/subql/compare/common-substrate/3.8.1...common-substrate/4.0.0
 [3.8.1]: https://github.com/subquery/subql/compare/common-substrate/3.8.0...common-substrate/3.8.1
 [3.8.0]: https://github.com/subquery/subql/compare/common-substrate/3.7.0...common-substrate/3.8.0
 [3.7.0]: https://github.com/subquery/subql/compare/common-substrate/3.6.0...common-substrate/3.7.0

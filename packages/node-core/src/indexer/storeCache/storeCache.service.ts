@@ -4,6 +4,7 @@
 import assert from 'assert';
 import {Injectable} from '@nestjs/common';
 import {EventEmitter2} from '@nestjs/event-emitter';
+import {SchedulerRegistry} from '@nestjs/schedule';
 import {DatabaseError, Deferrable, ModelStatic, Sequelize, Transaction} from '@subql/x-sequelize';
 import {sum} from 'lodash';
 import {NodeConfig} from '../../configure';
@@ -32,14 +33,17 @@ export class StoreCacheService extends BaseCacheService {
   private _useCockroachDb?: boolean;
   private _storeOperationIndex = 0;
   private _lastFlushedOperationIndex = 0;
-  private _lastFlushTs: Date;
   private exports: Exporter[] = [];
 
-  constructor(private sequelize: Sequelize, private config: NodeConfig, protected eventEmitter: EventEmitter2) {
+  constructor(
+    private sequelize: Sequelize,
+    private config: NodeConfig,
+    protected eventEmitter: EventEmitter2,
+    private schedulerRegistry: SchedulerRegistry
+  ) {
     super('StoreCache');
     this.storeCacheThreshold = config.storeCacheThreshold;
     this.cacheUpperLimit = config.storeCacheUpperLimit;
-    this._lastFlushTs = new Date();
 
     if (this.storeCacheThreshold > this.cacheUpperLimit) {
       exitWithError('Store cache threshold must be less than the store cache upper limit', logger);
@@ -51,6 +55,24 @@ export class StoreCacheService extends BaseCacheService {
     this._historical = historical;
     this.metadataRepo = meta;
     this.poiRepo = poi;
+
+    if (this.config.storeFlushInterval > 0) {
+      this.schedulerRegistry.addInterval(
+        'storeFlushInterval',
+        setInterval(() => {
+          this.flushCache(true).catch((e) => logger.warn(`storeFlushInterval failed ${e.message}`));
+        }, this.config.storeFlushInterval * 1000)
+      );
+    }
+  }
+
+  async beforeApplicationShutdown(): Promise<void> {
+    try {
+      this.schedulerRegistry.deleteInterval('storeFlushInterval');
+    } catch (e) {
+      /* Do nothing, an interval might not have been created */
+    }
+    await super.beforeApplicationShutdown();
   }
 
   getNextStoreOperationIndex(): number {
@@ -96,11 +118,14 @@ export class StoreCacheService extends BaseCacheService {
   async flushExportStores(): Promise<void> {
     await Promise.all(this.exports.map((f) => f.shutdown()));
   }
-  updateModels(models: ModelStatic<any>[]): void {
-    models.forEach((m) => {
+
+  updateModels({modifiedModels, removedModels}: {modifiedModels: ModelStatic<any>[]; removedModels: string[]}): void {
+    modifiedModels.forEach((m) => {
       this.cachedModels[m.name] = this.createModel(m.name);
     });
+    removedModels.forEach((r) => delete this.cachedModels[r]);
   }
+
   get metadata(): CacheMetadataModel {
     const entity = '_metadata';
     if (!this.cachedModels[entity]) {
@@ -169,7 +194,6 @@ export class StoreCacheService extends BaseCacheService {
       await tx.rollback();
       throw e;
     }
-    this._lastFlushTs = new Date();
   }
 
   _resetCache(): void {
@@ -198,7 +222,6 @@ export class StoreCacheService extends BaseCacheService {
     this.eventEmitter.emit(IndexerEvent.StoreCacheRecordsSize, {
       value: numOfRecords,
     });
-    const timeBasedFlush = new Date().getTime() - this._lastFlushTs.getTime() > this.config.storeFlushInterval * 1000;
-    return numOfRecords >= this.storeCacheThreshold || timeBasedFlush;
+    return numOfRecords >= this.storeCacheThreshold;
   }
 }

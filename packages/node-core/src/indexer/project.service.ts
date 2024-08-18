@@ -11,15 +11,7 @@ import {IProjectUpgradeService, NodeConfig} from '../configure';
 import {IndexerEvent} from '../events';
 import {getLogger} from '../logger';
 import {exitWithError, monitorWrite} from '../process';
-import {
-  getExistingProjectSchema,
-  getStartHeight,
-  hasValue,
-  initDbSchema,
-  initHotSchemaReload,
-  mainThreadOnly,
-  reindex,
-} from '../utils';
+import {getExistingProjectSchema, getStartHeight, hasValue, initDbSchema, mainThreadOnly, reindex} from '../utils';
 import {BlockHeightMap} from '../utils/blockHeightMap';
 import {BaseDsProcessorService} from './ds-processor.service';
 import {DynamicDsService} from './dynamic-ds.service';
@@ -41,7 +33,7 @@ class NotInitError extends Error {
 export abstract class BaseProjectService<
   API extends IApi,
   DS extends BaseDataSource,
-  UnfinalizedBlocksService extends IUnfinalizedBlocksService<any> = IUnfinalizedBlocksService<any>
+  UnfinalizedBlocksService extends IUnfinalizedBlocksService<any> = IUnfinalizedBlocksService<any>,
 > implements IProjectService<DS>
 {
   private _schema?: string;
@@ -49,7 +41,7 @@ export abstract class BaseProjectService<
   private _blockOffset?: number;
 
   protected abstract packageVersion: string;
-  protected abstract getBlockTimestamp(height: number): Promise<Date>;
+  protected abstract getBlockTimestamp(height: number): Promise<Date | undefined>;
   protected abstract onProjectChange(project: ISubqueryProject<IProjectNetworkConfig, DS>): void | Promise<void>;
 
   constructor(
@@ -100,6 +92,8 @@ export abstract class BaseProjectService<
   }
 
   async init(startHeight?: number): Promise<void> {
+    this.ensureTimezone();
+
     for await (const [, project] of this.projectUpgradeService.projects) {
       await project.applyCronTimestamps(this.getBlockTimestamp.bind(this));
     }
@@ -129,7 +123,6 @@ export abstract class BaseProjectService<
 
       // These need to be init before upgrade and unfinalized services because they may cause rewinds.
       await this.initDbSchema();
-      await this.initHotSchemaReload();
 
       if (this.nodeConfig.proofOfIndex) {
         // Prepare for poi migration and creation
@@ -166,6 +159,15 @@ export abstract class BaseProjectService<
     await this.dsProcessorService.validateProjectCustomDatasources(await this.getDataSources());
   }
 
+  private ensureTimezone(): void {
+    const timezone = process.env.TZ;
+    if (!timezone || timezone.toLowerCase() !== 'utc') {
+      throw new Error(
+        'Environment Timezone is not set to UTC. This may cause issues with indexing or proof of index\n Please try to set with "export TZ=UTC"'
+      );
+    }
+  }
+
   private async ensureProject(): Promise<string> {
     let schema = await this.getExistingProjectSchema();
     if (!schema) {
@@ -188,12 +190,8 @@ export abstract class BaseProjectService<
     return schema;
   }
 
-  private async initHotSchemaReload(): Promise<void> {
-    await initHotSchemaReload(this.schema, this.storeService);
-  }
-
   private async initDbSchema(): Promise<void> {
-    await initDbSchema(this.project, this.schema, this.storeService);
+    await initDbSchema(this.schema, this.storeService);
   }
 
   private async ensureMetadata(): Promise<void> {
