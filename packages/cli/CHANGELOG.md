@@ -6,6 +6,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.3.0] - 2024-10-21
+### Changed
+- Improve codegen error messages (#2567)
+- Update codegen to match changes to store interface making options.limit required on getByField(s) methods (#2567)
+
+## [5.2.8] - 2024-09-25
+### Changed
+- Bump common, Added manifest support for query-subgraph.
+
+## [5.2.7] - 2024-09-16
+### Fixed
+- deployment command minor issues (#2542)
+
+### Removed
+- deprecated cli-ux dependency, switched to using inquirer and ora (#2542)
+
+## [5.2.6] - 2024-09-09
+### Changed
+- Bump webpack from 5.93.0 to 5.94.0
+
+## [5.2.4] - 2024-08-23
+### Fixed
+- Fix migrate schema missing conversion for `Bytes` and `BigDecimal` type (#2538)
+
 ## [5.2.3] - 2024-08-14
 ### Fixed
 - Supports subgraph migration `kind: ethereum`.
@@ -663,7 +687,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - support subcommand codegen
 - support subcommand init
 
-[Unreleased]: https://github.com/subquery/subql/compare/cli/5.2.3...HEAD
+[Unreleased]: https://github.com/subquery/subql/compare/cli/5.3.0...HEAD
+[5.3.0]: https://github.com/subquery/subql/compare/cli/5.2.8...cli/5.3.0
+[5.2.8]: https://github.com/subquery/subql/compare/cli/5.2.7...cli/5.2.8
+[5.2.7]: https://github.com/subquery/subql/compare/cli/5.2.6...cli/5.2.7
+[5.2.6]: https://github.com/subquery/subql/compare/cli/5.2.4...cli/5.2.6
+[5.2.4]: https://github.com/subquery/subql/compare/cli/5.2.3...cli/5.2.4
 [5.2.3]: https://github.com/subquery/subql/compare/cli/5.2.2...cli/5.2.3
 [5.2.2]: https://github.com/subquery/subql/compare/cli/5.2.1...cli/5.2.2
 [5.2.1]: https://github.com/subquery/subql/compare/cli/5.2.0...cli/5.2.1

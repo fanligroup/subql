@@ -6,6 +6,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.2.8] - 2024-10-23
+### Changed
+- Bump `@subql/common-substrate` dependency
+
+## [5.2.7] - 2024-10-21
+### Fixed
+- Issues with setting a large block range for bypass blocks (#2566)
+
+## [5.2.6] - 2024-09-25
+### Changed
+- Bump common, Added manifest support for query-subgraph.
+
+## [5.2.5] - 2024-09-09
+### Changed
+- Update Dependency `node-core`
+
+## [5.2.3] - 2024-08-23
+### Fixed
+- Revert rimraf version
+
 ## [5.2.2] - 2024-08-14
 ### Added
 - Update polkadot/api library
@@ -1299,7 +1319,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - bump @polkadot/api to 3.1.1
 
-[Unreleased]: https://github.com/subquery/subql/compare/node/5.2.2...HEAD
+[Unreleased]: https://github.com/subquery/subql/compare/node/5.2.8...HEAD
+[5.2.8]: https://github.com/subquery/subql/compare/node/5.2.7...node/5.2.8
+[5.2.7]: https://github.com/subquery/subql/compare/node/5.2.6...node/5.2.7
+[5.2.6]: https://github.com/subquery/subql/compare/node/5.2.5...node/5.2.6
+[5.2.5]: https://github.com/subquery/subql/compare/node/5.2.3...node/5.2.5
+[5.2.3]: https://github.com/subquery/subql/compare/node/5.2.2...node/5.2.3
 [5.2.2]: https://github.com/subquery/subql/compare/node/5.2.1...node/5.2.2
 [5.2.1]: https://github.com/subquery/subql/compare/node/5.2.0...node/5.2.1
 [5.2.0]: https://github.com/subquery/subql/compare/node/5.1.0...node/5.2.0

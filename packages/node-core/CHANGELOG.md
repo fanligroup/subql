@@ -6,6 +6,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [14.1.6] - 2024-10-21
+### Fixed
+- Issues with setting a large block range for bypass blocks (#2566)
+- Test runner not setting lastProcessedHeight leading to data not being flushed (#2569)
+- Unable to rewind unfinalized blocks on startup (#2570)
+- Store `getByFields` returning removed cache data (#2571)
+
+### Changed
+- Throw error when store getByField(s) options.limit exceeds queryLimit option (#2567)
+
+## [14.1.5] - 2024-09-25
+### Changed
+- Bump common, Added manifest support for query-subgraph.
+
+## [14.1.4] - 2024-09-09
+### Changed
+- Reuse the same temp dir when project is from IPFS (#2551)
+
+### Fixed
+- GraphQL field support for consecutive uppercase letters.
+
+## [14.1.3] - 2024-08-30
+### Fixed
+- Fixed Corn filter (#2547)
+
 ## [14.1.2] - 2024-08-14
 ### Added
 - Update polkadot/api library
@@ -811,7 +836,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Move blockchain agnostic code from `node` to `node-core` package. (#1222)
 
-[Unreleased]: https://github.com/subquery/subql/compare/node-core/14.1.2...HEAD
+[Unreleased]: https://github.com/subquery/subql/compare/node-core/14.1.6...HEAD
+[14.1.6]: https://github.com/subquery/subql/compare/node-core/14.1.5...node-core/14.1.6
+[14.1.5]: https://github.com/subquery/subql/compare/node-core/14.1.4...node-core/14.1.5
+[14.1.4]: https://github.com/subquery/subql/compare/node-core/14.1.3...node-core/14.1.4
+[14.1.3]: https://github.com/subquery/subql/compare/node-core/14.1.2...node-core/14.1.3
 [14.1.2]: https://github.com/subquery/subql/compare/node-core/14.1.1...node-core/14.1.2
 [14.1.1]: https://github.com/subquery/subql/compare/node-core/14.1.0...node-core/14.1.1
 [14.1.0]: https://github.com/subquery/subql/compare/node-core/14.0.0...node-core/14.1.0

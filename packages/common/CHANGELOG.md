@@ -6,6 +6,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.1.4] - 2024-10-23
+### Fixed
+- Bump version `@subql/types-core`
+
+## [5.1.3] - 2024-09-25
+### Added
+- `Runner.query` support `@subql/query-subgraph` option
+
+## [5.1.2] - 2024-09-09
+### Changed
+- Expose CID on IPFS Reader (#2551)
+
 ## [5.1.1] - 2024-08-14
 ### Added
 - Update polkadot/api library
@@ -407,7 +419,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - init commit
 
-[Unreleased]: https://github.com/subquery/subql/compare/common/5.1.1...HEAD
+[Unreleased]: https://github.com/subquery/subql/compare/common/5.1.4...HEAD
+[5.1.4]: https://github.com/subquery/subql/compare/common/5.1.3...common/5.1.4
+[5.1.3]: https://github.com/subquery/subql/compare/common/5.1.2...common/5.1.3
+[5.1.2]: https://github.com/subquery/subql/compare/common/5.1.1...common/5.1.2
 [5.1.1]: https://github.com/subquery/subql/compare/common/5.1.0...common/5.1.1
 [5.1.0]: https://github.com/subquery/subql/compare/common/5.0.0...common/5.1.0
 [5.0.0]: https://github.com/subquery/subql/compare/common/4.1.1...common/5.0.0
